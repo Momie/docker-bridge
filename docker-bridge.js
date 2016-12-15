@@ -94,8 +94,10 @@ module.exports.sendFile = sendFile = function (container , file , path) {
   return new Promise(function (resolve , reject) {
       try {
         container.exec({Cmd: ["sh", "-c" , "cat > " + path ], AttachStdin: true, AttachStdout: true}, function(err, exec) {
-          console.log(err, 'Error while sending file')
-          if (err || !exec ) return reject(err)
+          if (err || !exec ) {
+            console.log(err, 'Error while sending file')
+            return reject(err)
+          }
           exec.start({hijack: true, stdin: true}, function(err, stream) {
              stream.on('close', function(){
                resolve(true)
@@ -116,8 +118,11 @@ module.exports.createFile = createFile = function (container , data , path) {
   return new Promise(function (resolve , reject) {
       try {
         container.exec({Cmd: ["sh", "-c" , "cat > " + path ], AttachStdin: true, AttachStdout: true}, function(err, exec) {
-          console.log(err, 'Error while sending file')
-          if (err || !exec ) return reject(err)
+
+          if (err || !exec ) {
+            console.log(err, 'Error while sending file')
+            return reject(err)
+          }
           exec.start({hijack: true, stdin: true}, function(err, stream) {
              stream.on('close', function(){
                resolve(true)
@@ -161,8 +166,8 @@ module.exports.execCommand = function (container , cmd , stdin) {
                reject(err)
              })
              stream.on('data', function(newdata){
-               console.log(newdata.toString('utf8'))
-               data.push(newdata.toString('utf8').replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, ''))
+               if(newdata.toString('utf8') == '') return
+               data.push(newdata.toString('utf8'))
              })
              stream.write('\n')
           })
